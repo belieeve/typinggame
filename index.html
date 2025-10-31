@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>たのしいタイピングゲーム！</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Meiryo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .target-area {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .target-hiragana {
+            font-size: 6em;
+            color: white;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .target-romaji {
+            font-size: 3em;
+            color: #ffe66d;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .next-key {
+            font-size: 2.5em;
+            color: white;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px 30px;
+            border-radius: 15px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .next-key-label {
+            font-size: 1.2em;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+
+        .keyboard-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .key {
+            width: 50px;
+            height: 50px;
+            background: #f0f0f0;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
+
+        .key.highlight {
+            background: linear-gradient(135deg, #ffd93d 0%, #ffbc42 100%);
+            border-color: #ff6b6b;
+            transform: scale(1.2);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            animation: keyPulse 0.6s ease-in-out infinite;
+        }
+
+        @keyframes keyPulse {
+            0%, 100% { transform: scale(1.2); }
+            50% { transform: scale(1.3); }
+        }
+
+        .key.pressed {
+            background: #4ecdc4;
+            transform: scale(0.95);
+        }
+
+        .key.space {
+            width: 300px;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            min-height: 60px;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .message.success {
+            color: #4ecdc4;
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .start-button {
+            display: block;
+            margin: 0 auto;
+            padding: 20px 60px;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .start-button:hover {
+            transform: scale(1.05);
+        }
+
+        .start-button:active {
+            transform: scale(0.95);
+        }
+
+        .game-area {
+            display: none;
+        }
+
+        .game-area.active {
+            display: block;
+        }
+
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen.hidden {
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4 0%, #44a08d 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5em;
+            pointer-events: none;
+            animation: celebrate 1s ease-out forwards;
+            z-index: 1000;
+        }
+
+        @keyframes celebrate {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1) translateY(-100px);
+                opacity: 0;
+            }
+        }
+
+        .hint {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #856404;
+        }
+
+        .skip-button {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 20px auto;
+            display: block;
+            transition: transform 0.2s;
+        }
+
+        .skip-button:hover {
+            transform: scale(1.05);
+        }
+
+        .skip-button:active {
+            transform: scale(0.95);
+        }
+
+        .explanation {
+            background: #e3f2fd;
+            border: 3px solid #2196f3;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            color: #1565c0;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        .key-sequence {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .key-box {
+            background: linear-gradient(135deg, #ffd93d 0%, #ffbc42 100%);
+            color: #333;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 2.5em;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            border: 3px solid #ff6b6b;
+        }
+
+        .key-box.done {
+            background: #90ee90;
+            border-color: #4caf50;
+        }
+
+        .arrow {
+            font-size: 2em;
+            color: #666;
+        }
+
+        .restart-button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 20px auto;
+            display: block;
+            transition: transform 0.2s;
+        }
+
+        .restart-button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 たのしいタイピングゲーム！</h1>
+        <p class="subtitle">ローマ字をおぼえよう！</p>
+
+        <div class="start-screen" id="startScreen">
+            <div class="hint">
+                💡 キーボードで光っているキーをおしてね！<br>
+                ローマ字がわからなくても大丈夫！
+            </div>
+            <button class="start-button" onclick="startGame()">スタート！</button>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="game-info">
+                <div class="info-box">
+                    <span>⭐ レベル: <span id="level">1</span></span>
+                </div>
+                <div class="info-box">
+                    <span>🏆 スコア: <span id="score">0</span></span>
+                </div>
+                <div class="info-box">
+                    <span>🎯 せいかい: <span id="correct">0</span></span>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0/5</div>
+            </div>
+
+            <div class="explanation" id="explanation">
+                キーボードで光っているキーをおしてね！
+            </div>
+
+            <div class="message" id="message">がんばって！</div>
+
+            <div class="target-area">
+                <div class="target-hiragana" id="targetHiragana">あ</div>
+                <div class="target-romaji" id="targetRomaji">a</div>
+
+                <div class="key-sequence" id="keySequence">
+                    <!-- キーシーケンスをここに表示 -->
+                </div>
+
+                <div class="next-key-label">いまからおすキー ↓</div>
+                <div class="next-key" id="nextKey">A</div>
+            </div>
+
+            <button class="skip-button" onclick="skipQuestion()">
+                ⏭️ むずかしい！つぎへ
+            </button>
+
+            <div class="keyboard" id="keyboard">
+                <div class="keyboard-row">
+                    <div class="key" data-key="1">1</div>
+                    <div class="key" data-key="2">2</div>
+                    <div class="key" data-key="3">3</div>
+                    <div class="key" data-key="4">4</div>
+                    <div class="key" data-key="5">5</div>
+                    <div class="key" data-key="6">6</div>
+                    <div class="key" data-key="7">7</div>
+                    <div class="key" data-key="8">8</div>
+                    <div class="key" data-key="9">9</div>
+                    <div class="key" data-key="0">0</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key" data-key="q">Q</div>
+                    <div class="key" data-key="w">W</div>
+                    <div class="key" data-key="e">E</div>
+                    <div class="key" data-key="r">R</div>
+                    <div class="key" data-key="t">T</div>
+                    <div class="key" data-key="y">Y</div>
+                    <div class="key" data-key="u">U</div>
+                    <div class="key" data-key="i">I</div>
+                    <div class="key" data-key="o">O</div>
+                    <div class="key" data-key="p">P</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key" data-key="a">A</div>
+                    <div class="key" data-key="s">S</div>
+                    <div class="key" data-key="d">D</div>
+                    <div class="key" data-key="f">F</div>
+                    <div class="key" data-key="g">G</div>
+                    <div class="key" data-key="h">H</div>
+                    <div class="key" data-key="j">J</div>
+                    <div class="key" data-key="k">K</div>
+                    <div class="key" data-key="l">L</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key" data-key="z">Z</div>
+                    <div class="key" data-key="x">X</div>
+                    <div class="key" data-key="c">C</div>
+                    <div class="key" data-key="v">V</div>
+                    <div class="key" data-key="b">B</div>
+                    <div class="key" data-key="n">N</div>
+                    <div class="key" data-key="m">M</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ローマ字対応表（レベル別）
+        const hiraganaData = {
+            1: [ // レベル1: 母音
+                {hiragana: 'あ', romaji: 'a', explanation: '「a」のキーを１かいおしてね'},
+                {hiragana: 'い', romaji: 'i', explanation: '「i」のキーを１かいおしてね'},
+                {hiragana: 'う', romaji: 'u', explanation: '「u」のキーを１かいおしてね'},
+                {hiragana: 'え', romaji: 'e', explanation: '「e」のキーを１かいおしてね'},
+                {hiragana: 'お', romaji: 'o', explanation: '「o」のキーを１かいおしてね'},
+            ],
+            2: [ // レベル2: か行
+                {hiragana: 'か', romaji: 'ka', explanation: '「k」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'き', romaji: 'ki', explanation: '「k」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'く', romaji: 'ku', explanation: '「k」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'け', romaji: 'ke', explanation: '「k」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'こ', romaji: 'ko', explanation: '「k」をおして、つぎに「o」をおしてね'},
+            ],
+            3: [ // レベル3: さ行
+                {hiragana: 'さ', romaji: 'sa', explanation: '「s」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'し', romaji: 'si', explanation: '「s」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'す', romaji: 'su', explanation: '「s」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'せ', romaji: 'se', explanation: '「s」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'そ', romaji: 'so', explanation: '「s」をおして、つぎに「o」をおしてね'},
+            ],
+            4: [ // レベル4: た行
+                {hiragana: 'た', romaji: 'ta', explanation: '「t」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'ち', romaji: 'ti', explanation: '「t」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'つ', romaji: 'tu', explanation: '「t」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'て', romaji: 'te', explanation: '「t」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'と', romaji: 'to', explanation: '「t」をおして、つぎに「o」をおしてね'},
+            ],
+            5: [ // レベル5: な行
+                {hiragana: 'な', romaji: 'na', explanation: '「n」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'に', romaji: 'ni', explanation: '「n」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'ぬ', romaji: 'nu', explanation: '「n」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'ね', romaji: 'ne', explanation: '「n」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'の', romaji: 'no', explanation: '「n」をおして、つぎに「o」をおしてね'},
+            ],
+            6: [ // レベル6: は行
+                {hiragana: 'は', romaji: 'ha', explanation: '「h」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'ひ', romaji: 'hi', explanation: '「h」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'ふ', romaji: 'hu', explanation: '「h」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'へ', romaji: 'he', explanation: '「h」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'ほ', romaji: 'ho', explanation: '「h」をおして、つぎに「o」をおしてね'},
+            ],
+            7: [ // レベル7: ま行
+                {hiragana: 'ま', romaji: 'ma', explanation: '「m」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'み', romaji: 'mi', explanation: '「m」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'む', romaji: 'mu', explanation: '「m」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'め', romaji: 'me', explanation: '「m」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'も', romaji: 'mo', explanation: '「m」をおして、つぎに「o」をおしてね'},
+            ],
+            8: [ // レベル8: や行
+                {hiragana: 'や', romaji: 'ya', explanation: '「y」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'ゆ', romaji: 'yu', explanation: '「y」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'よ', romaji: 'yo', explanation: '「y」をおして、つぎに「o」をおしてね'},
+            ],
+            9: [ // レベル9: ら行
+                {hiragana: 'ら', romaji: 'ra', explanation: '「r」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'り', romaji: 'ri', explanation: '「r」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'る', romaji: 'ru', explanation: '「r」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'れ', romaji: 're', explanation: '「r」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'ろ', romaji: 'ro', explanation: '「r」をおして、つぎに「o」をおしてね'},
+            ],
+            10: [ // レベル10: わ行
+                {hiragana: 'わ', romaji: 'wa', explanation: '「w」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'を', romaji: 'wo', explanation: '「w」をおして、つぎに「o」をおしてね'},
+                {hiragana: 'ん', romaji: 'nn', explanation: '「n」を２かいおしてね'},
+            ],
+            11: [ // レベル11: が行（濁音）
+                {hiragana: 'が', romaji: 'ga', explanation: '「g」をおして、つぎに「a」をおしてね（「か」にてんてんだよ）'},
+                {hiragana: 'ぎ', romaji: 'gi', explanation: '「g」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'ぐ', romaji: 'gu', explanation: '「g」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'げ', romaji: 'ge', explanation: '「g」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'ご', romaji: 'go', explanation: '「g」をおして、つぎに「o」をおしてね'},
+            ],
+            12: [ // レベル12: ざ行
+                {hiragana: 'ざ', romaji: 'za', explanation: '「z」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'じ', romaji: 'zi', explanation: '「z」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'ず', romaji: 'zu', explanation: '「z」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'ぜ', romaji: 'ze', explanation: '「z」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'ぞ', romaji: 'zo', explanation: '「z」をおして、つぎに「o」をおしてね'},
+            ],
+            13: [ // レベル13: だ行
+                {hiragana: 'だ', romaji: 'da', explanation: '「d」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'ぢ', romaji: 'di', explanation: '「d」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'づ', romaji: 'du', explanation: '「d」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'で', romaji: 'de', explanation: '「d」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'ど', romaji: 'do', explanation: '「d」をおして、つぎに「o」をおしてね'},
+            ],
+            14: [ // レベル14: ば行
+                {hiragana: 'ば', romaji: 'ba', explanation: '「b」をおして、つぎに「a」をおしてね'},
+                {hiragana: 'び', romaji: 'bi', explanation: '「b」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'ぶ', romaji: 'bu', explanation: '「b」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'べ', romaji: 'be', explanation: '「b」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'ぼ', romaji: 'bo', explanation: '「b」をおして、つぎに「o」をおしてね'},
+            ],
+            15: [ // レベル15: ぱ行
+                {hiragana: 'ぱ', romaji: 'pa', explanation: '「p」をおして、つぎに「a」をおしてね（「は」にまるだよ）'},
+                {hiragana: 'ぴ', romaji: 'pi', explanation: '「p」をおして、つぎに「i」をおしてね'},
+                {hiragana: 'ぷ', romaji: 'pu', explanation: '「p」をおして、つぎに「u」をおしてね'},
+                {hiragana: 'ぺ', romaji: 'pe', explanation: '「p」をおして、つぎに「e」をおしてね'},
+                {hiragana: 'ぽ', romaji: 'po', explanation: '「p」をおして、つぎに「o」をおしてね'},
+            ],
+            16: [ // レベル16: きゃ行（拗音）
+                {hiragana: 'きゃ', romaji: 'kya', explanation: '「k」→「y」→「a」を順番におしてね'},
+                {hiragana: 'きゅ', romaji: 'kyu', explanation: '「k」→「y」→「u」を順番におしてね'},
+                {hiragana: 'きょ', romaji: 'kyo', explanation: '「k」→「y」→「o」を順番におしてね'},
+            ],
+            17: [ // レベル17: しゃ行
+                {hiragana: 'しゃ', romaji: 'sya', explanation: '「s」→「y」→「a」を順番におしてね'},
+                {hiragana: 'しゅ', romaji: 'syu', explanation: '「s」→「y」→「u」を順番におしてね'},
+                {hiragana: 'しょ', romaji: 'syo', explanation: '「s」→「y」→「o」を順番におしてね'},
+            ],
+            18: [ // レベル18: ちゃ行
+                {hiragana: 'ちゃ', romaji: 'tya', explanation: '「t」→「y」→「a」を順番におしてね'},
+                {hiragana: 'ちゅ', romaji: 'tyu', explanation: '「t」→「y」→「u」を順番におしてね'},
+                {hiragana: 'ちょ', romaji: 'tyo', explanation: '「t」→「y」→「o」を順番におしてね'},
+            ],
+        };
+
+        let currentLevel = 1;
+        let currentScore = 0;
+        let correctCount = 0;
+        let currentTarget = null;
+        let currentInput = '';
+        let levelProgress = 0;
+        let levelTarget = 5;
+
+        const messages = [
+            'すごい！',
+            'やったね！',
+            'かんぺき！',
+            'さいこう！',
+            'よくできました！',
+            'すばらしい！',
+            'てんさい！',
+            'がんばったね！',
+        ];
+
+        function startGame() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('gameArea').classList.add('active');
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            const levelData = hiraganaData[currentLevel];
+            if (!levelData) {
+                // 全レベルクリア
+                showMessage('🎉 ぜんぶクリア！おめでとう！🎉');
+                document.getElementById('explanation').innerHTML = '<strong>すべてのレベルをクリアしました！すごい！</strong>';
+                return;
+            }
+
+            currentTarget = levelData[Math.floor(Math.random() * levelData.length)];
+            currentInput = '';
+
+            document.getElementById('targetHiragana').textContent = currentTarget.hiragana;
+            document.getElementById('targetRomaji').textContent = currentTarget.romaji;
+            document.getElementById('explanation').textContent = currentTarget.explanation;
+
+            updateKeySequence();
+            updateNextKey();
+            updateDisplay();
+        }
+
+        function updateKeySequence() {
+            const keySequenceEl = document.getElementById('keySequence');
+            keySequenceEl.innerHTML = '';
+
+            const keys = currentTarget.romaji.split('');
+            keys.forEach((key, index) => {
+                if (index > 0) {
+                    const arrow = document.createElement('div');
+                    arrow.className = 'arrow';
+                    arrow.textContent = '→';
+                    keySequenceEl.appendChild(arrow);
+                }
+
+                const keyBox = document.createElement('div');
+                keyBox.className = 'key-box';
+                if (index < currentInput.length) {
+                    keyBox.classList.add('done');
+                }
+                keyBox.textContent = key.toUpperCase();
+                keyBox.id = 'key-box-' + index;
+                keySequenceEl.appendChild(keyBox);
+            });
+        }
+
+        function updateNextKey() {
+            const nextChar = currentTarget.romaji[currentInput.length];
+            if (nextChar) {
+                document.getElementById('nextKey').textContent = nextChar.toUpperCase();
+                highlightKey(nextChar);
+            }
+        }
+
+        function skipQuestion() {
+            showMessage('つぎのもんだいにいくよ！');
+            setTimeout(() => {
+                nextQuestion();
+            }, 500);
+        }
+
+        function highlightKey(char) {
+            // すべてのキーのハイライトを解除
+            document.querySelectorAll('.key').forEach(key => {
+                key.classList.remove('highlight');
+            });
+
+            // 指定されたキーをハイライト
+            const keyElement = document.querySelector(`.key[data-key="${char.toLowerCase()}"]`);
+            if (keyElement) {
+                keyElement.classList.add('highlight');
+            }
+        }
+
+        function showMessage(msg) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = msg;
+            messageEl.classList.add('success');
+            setTimeout(() => {
+                messageEl.classList.remove('success');
+            }, 500);
+        }
+
+        function celebrate() {
+            const celebration = document.createElement('div');
+            celebration.className = 'celebration';
+            celebration.textContent = ['🎉', '⭐', '🌟', '✨', '🎊'][Math.floor(Math.random() * 5)];
+            document.body.appendChild(celebration);
+            setTimeout(() => {
+                document.body.removeChild(celebration);
+            }, 1000);
+        }
+
+        function updateDisplay() {
+            document.getElementById('level').textContent = currentLevel;
+            document.getElementById('score').textContent = currentScore;
+            document.getElementById('correct').textContent = correctCount;
+
+            const progress = (levelProgress / levelTarget) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressFill').textContent = `${levelProgress}/${levelTarget}`;
+        }
+
+        function levelUp() {
+            currentLevel++;
+            levelProgress = 0;
+            showMessage('🎊 レベルアップ！🎊');
+            celebrate();
+
+            // レベルアップ時の演出
+            setTimeout(() => {
+                nextQuestion();
+            }, 1500);
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (!currentTarget) return;
+
+            const key = event.key.toLowerCase();
+            const expectedKey = currentTarget.romaji[currentInput.length];
+
+            // キーの視覚フィードバック
+            const keyElement = document.querySelector(`.key[data-key="${key}"]`);
+            if (keyElement) {
+                keyElement.classList.add('pressed');
+                setTimeout(() => {
+                    keyElement.classList.remove('pressed');
+                }, 200);
+            }
+
+            if (key === expectedKey) {
+                currentInput += key;
+
+                // キーシーケンスを更新
+                const keyBox = document.getElementById('key-box-' + (currentInput.length - 1));
+                if (keyBox) {
+                    keyBox.classList.add('done');
+                }
+
+                if (currentInput === currentTarget.romaji) {
+                    // 正解！
+                    currentScore += 10 * currentLevel;
+                    correctCount++;
+                    levelProgress++;
+
+                    showMessage(messages[Math.floor(Math.random() * messages.length)]);
+                    celebrate();
+
+                    if (levelProgress >= levelTarget) {
+                        // レベルアップ
+                        setTimeout(() => {
+                            levelUp();
+                        }, 800);
+                    } else {
+                        // 次の問題
+                        setTimeout(() => {
+                            nextQuestion();
+                        }, 800);
+                    }
+                } else {
+                    // まだ途中
+                    updateNextKey();
+                }
+            } else {
+                // 間違い
+                const wrongMessages = [
+                    'ちがうよ！もういちど！',
+                    'おしいね！ひかってるキーをおしてね！',
+                    'もういちどチャレンジ！',
+                    'だいじょうぶ！ゆっくりでいいよ！'
+                ];
+                showMessage(wrongMessages[Math.floor(Math.random() * wrongMessages.length)]);
+            }
+        });
+    </script>
+</body>
+</html>
